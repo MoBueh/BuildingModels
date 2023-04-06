@@ -1,0 +1,8 @@
+B13790_op_air.py	->	Model aus DIN EN ISO 13790, Heizleistung auf Luftknoten
+B13790_op_surface.py	->	Model aus DIN EN ISO 13790, Heizleistung auf Oberflächenknoten
+B13790_op_mass.py	->	Model aus DIN EN ISO 13790, Heizleistung auf Masseknoten
+B13790_DESIGN.py	->	Addon zur Bestimmung der benötigten Heiz-/ Kühlleistung um gewünschte Temperatur in Zone zu erreichen
+min_B1R1C.py		->	Model mit 1 Kapazität und einem Widerstand in Minutenschrittweite
+min_B5R1C_simplified.py	->	Model mit 1 Kapazität und fünf Widerständen in Minutenschrittweite, vereinfachte Parameter für Solareinstrahlung
+B5R1C_simplified.py	->	Model mit 1 Kapazität und fünf Widerständen in Stundenschrittweite, vereinfachte Parameter für Solareinstrahlung
+B1R1C.py		->	Model mit 1 Kapazität und einem Widerstand in Stundenschrittweite
