@@ -2,29 +2,28 @@
 """
 Created on Mon Mar  6 16:03:45 2023
 
-@author: 49157
+@author: MoBueh
 """
 
 #%% Directory
 import os
-os.chdir('C:/Users/49157/Desktop/Modellvergleich')
+os.chdir('C:/Users/49157/Documents/Python/BuildingModels')
 
 #%% Libraries
 import pandas as pd
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from Vergleich.min_B1R1C import B1R1C
-from Vergleich.min_B1R1C_JP import B1R1C_JP
+
+from Models.min_B5R1C_simplified import B5R1C
+from Models.min_B1R1C import B1R1C
+# from Vergleich.min_B1R1C_JP import B1R1C_JP
+
 # from Vergleich.B1R1C import B1R1C
-from Vergleich.min_B5R1C_simplified import B5R1C
 # from Vergleich.B5R1C_simplified import B5R1C
-from Modelle.RadProc import RadProc
+
 plt.rc('axes', axisbelow=True)
 plt.rcParams['figure.dpi'] = 800
-
-# #%% input
-# inp = pd.read_csv('Input.csv', index_col = 0)
 
 #%% Parameter-Set
 param = {}
@@ -58,7 +57,7 @@ param['B5R1C'] = {
     }
 
 #%% Test
-T = 60    #min
+T = 60*24    #min
 
 theta_e = [0]
 for i in range(1,(T*10)+1):
@@ -84,14 +83,14 @@ for time in range(0,T*10,1):
                     i_sol = 0,
                     param = param['B1R1C'])
     GB_theta_i.append(GB_1R1C)
-    GB_1R1C_JP = B1R1C_JP(phi_int = 0,
-                       # theta_e = inp.loc[time,'t'],
-                       theta_e = theta_e[time],
-                       phi_HC = 0,
-                       theta_prev = GB_theta_i[-1],
-                       i_sol = 0,
-                       param = param['B1R1C'])
-    GB_theta_i_JP.append(GB_1R1C)
+    # GB_1R1C_JP = B1R1C_JP(phi_int = 0,
+    #                    # theta_e = inp.loc[time,'t'],
+    #                    theta_e = theta_e[time],
+    #                    phi_HC = 0,
+    #                    theta_prev = GB_theta_i[-1],
+    #                    i_sol = 0,
+    #                    param = param['B1R1C'])
+    # GB_theta_i_JP.append(GB_1R1C)
     GB_5R1C = B5R1C(phi_int = 0,
                     # theta_e = inp.loc[time,'t'],
                     theta_e = theta_e[time],
@@ -112,33 +111,18 @@ for time in range(0,T*10,1):
 
 plt.plot(range(0, len(GB_theta_i)), theta_e)
 plt.plot(range(0, len(GB_theta_i)), GB_theta_i)
-plt.plot(range(0, len(GB_theta_i)), GB_theta_i_JP)
+# plt.plot(range(0, len(GB_theta_i)), GB_theta_i_JP)
 plt.plot(range(0, len(GB_theta_i)), GB_theta_air)
 plt.xlabel('t in h')
 plt.grid()
 # print(abs(min(GB_theta_i)))
 
-print(sum([abs(a-b) for a,b in zip(GB_theta_i, GB_theta_i_JP)]))
+# print(sum([abs(a-b) for a,b in zip(GB_theta_i, GB_theta_i_JP)]))
 
 
 #%% Phaseshift
-# steps = []
-# a = 0
-# while a<=24*3:
-#     a = a+1
-#     steps.append(a*60)
-# while a<=24*6:
-#     a = a+10
-#     steps.append(a*60)
-# while a<=24*10:
-#     a = a+100
-#     steps.append(a*60)
-# while a<=24*48*1.6:
-#     a = a+200
-#     steps.append(a*60)
-# del a
 steps = []
-a = 0
+a = 23
 while a<=24*3:
     a = a+1
     steps.append(a*60)
@@ -160,15 +144,11 @@ phaseshift['T / h'] = [i/60 for i in steps]
 for cm, kat in zip([110000, 165000, 260000], ['leicht', 'mittel', 'schwer']):
     param['B5R1C']['Coe_Cm'] = cm
     param['B1R1C']['C_m'] = cm*param['B5R1C']['A_f']
-    
-    
     ps_1R1C = []
     ps_5R1C = []
-    a = 0
+
     for h in steps:
-        a = a+1
-        # print(kat + '_1: ' + str(a) + ' / ' + str(len(steps)))
-        print(h/60)
+        print(kat + ': ' + str(h/60))
         T = h
         theta_e = [0]
         for i in range(1,(T*5)+1):
@@ -193,22 +173,8 @@ for cm, kat in zip([110000, 165000, 260000], ['leicht', 'mittel', 'schwer']):
         max_out = df_1R1C[(0+4)*T: (1+4)*T]['output'].idxmax()
         # print(abs(360/T*max_in-360/T*max_out))
         ps_1R1C.append(abs(360/T*max_in-360/T*max_out))
-        
-        # plt.plot(range(0, len(theta_e)), theta_e)
-        # plt.plot(range(0, len(GB_theta_i)), GB_theta_i)
-        # plt.scatter(max_in,100)
-        # plt.scatter(max_out,df_1R1C.loc[max_out,'output'])
-        # plt.show()
+
             
-
-
-    # for h in steps:
-    #     print(kat + '_2: ' + str(round(h/24/60/77.21*100,2)) + ' %')
-    #     T = h
-        # theta_e = [0]
-        # for i in range(1,(T*5)+1):
-        #     theta_e.append(100*np.sin(i*2*np.pi/T))
-        # plt.plot(range(0, len(theta_e)), theta_e)
         
         # 5R1C
         GB_theta_m = [0]
@@ -244,10 +210,10 @@ for cm, kat in zip([110000, 165000, 260000], ['leicht', 'mittel', 'schwer']):
 del df_1R1C, df_5R1C, GB_1R1C, GB_5R1C, GB_theta_air, GB_theta_i, GB_theta_m, GB_theta_operative, GB_theta_s, i, h, kat, max_in, max_out, ps_1R1C, ps_5R1C, steps, T, theta_e, time, cm
 
 #%%% Storing
-phaseshift.to_csv('Vergleich/phaseshift.csv')  
+phaseshift.to_csv('Analyse/Vergleich_5R1C_1R1C/phaseshift.csv')  
     
 #%%% Plotting
-phaseshift = pd.read_csv('Vergleich/phaseshift.csv', index_col = 0)
+phaseshift = pd.read_csv('Analyse/Vergleich_5R1C_1R1C/phaseshift.csv', index_col = 0)
 
 plt.plot([0,1],[-20,-30], c = 'black', label = 'leicht')
 plt.plot([0,1],[-20,-30],linestyle = '--', c = 'black', label = 'mittel')
@@ -271,23 +237,8 @@ plt.legend()
 plt.show()
 
 #%% Damping
-# steps = []
-# a = 0
-# while a<=24*3:
-#     a = a+1
-#     steps.append(a*60)
-# while a<=24*6:
-#     a = a+10
-#     steps.append(a*60)
-# while a<=24*10:
-#     a = a+100
-#     steps.append(a*60)
-# while a<=24*48*1.6:
-#     a = a+200
-#     steps.append(a*60)
-# del a
 steps = []
-a = 0
+a = 23
 while a<=24*3:
     a = a+1
     steps.append(a*60)
@@ -314,7 +265,7 @@ for cm, kat in zip([110000, 165000, 260000], ['leicht', 'mittel', 'schwer']):
     damp_1R1C = []
     damp_5R1C = []
     for h in steps:
-        print(kat + ': ' + str(round(h/24/60/77.21*100,2)) + ' %')
+        print(kat + ': ' + str(h/60))
         T = h
         theta_e = [0]
         for i in range(1,(T*20)+1):
@@ -366,10 +317,10 @@ for cm, kat in zip([110000, 165000, 260000], ['leicht', 'mittel', 'schwer']):
 del damp_1R1C, damp_5R1C, GB_1R1C, GB_5R1C, GB_theta_air, GB_theta_i, GB_theta_m, GB_theta_operative, GB_theta_s, i, h, kat, steps, T, theta_e, time, cm
 
 #%%% Storing
-damping.to_csv('Vergleich/damping.csv')  
+damping.to_csv('Analyse/Vergleich_5R1C_1R1C/damping.csv')   
     
 #%%% Plotting
-damping = pd.read_csv('Vergleich/damping.csv', index_col = 0)
+damping = pd.read_csv('Analyse/Vergleich_5R1C_1R1C/damping.csv', index_col = 0)
 
 plt.plot([0,1],[-20,-30], c = 'black', label = 'leicht')
 plt.plot([0,1],[-20,-30],linestyle = '--', c = 'black', label = 'mittel')
@@ -383,7 +334,7 @@ plt.plot(damping['T / h'], damping['1R1C_schwer_G'],linestyle = '-.', c = 'tab:g
 plt.plot(damping['T / h'], damping['5R1C_mittel_G'], label = '5R1C', c = 'tab:blue')
 plt.plot(damping['T / h'], damping['5R1C_leicht_G'], linestyle = '--', c = 'tab:blue', alpha = 0.3)
 plt.plot(damping['T / h'], damping['5R1C_schwer_G'], linestyle = '-.', c = 'tab:blue', alpha = 0.3)
-# plt.xlim(0,20)
+plt.xlim(0,8760)
 plt.ylabel('Dämpfung G')
 plt.xlabel('Periodendauer T in h')
 plt.ylim(-0.02,1.02)
@@ -392,8 +343,8 @@ plt.legend()
 plt.show()
 
 #%% Bode-Diagramm
-phaseshift = pd.read_csv('Vergleich/phaseshift.csv', index_col = 0)
-damping = pd.read_csv('Vergleich/damping.csv', index_col = 0)
+phaseshift = pd.read_csv('Analyse/Vergleich_5R1C_1R1C/phaseshift.csv', index_col = 0)
+damping = pd.read_csv('Analyse/Vergleich_5R1C_1R1C/damping.csv', index_col = 0)
 
 for i in phaseshift.index:
    phaseshift.loc[i, 'f'] = 2*math.pi/(phaseshift.loc[i, 'T / h'])
@@ -407,8 +358,9 @@ for typ in damping.columns[1:-1]:
 del i, typ
 
 #%%% PLot Damping
-plt.plot([0,1],[20,30], c = 'black', label = 'leicht')
-plt.plot([0,1],[20,30],linestyle = '--', c = 'black', label = 'mittel')
+
+plt.plot([0,1],[20,30],linestyle = '--', c = 'black', label = 'leicht')
+plt.plot([0,1],[20,30], c = 'black', label = 'mittel')
 plt.plot([0,1],[20,30],linestyle = '-.', c = 'black', label = 'schwer')
 plt.plot([0,1],[20,30],linestyle = '-.', c = 'white', label = ' ')
 
@@ -420,24 +372,29 @@ plt.plot(phaseshift['f'], damping['1R1C_schwer_dB'],linestyle = '-.', c = 'tab:g
 plt.plot(damping['f'], damping['5R1C_mittel_dB'], label = '5R1C', c = 'tab:blue')
 plt.plot(damping['f'], damping['5R1C_leicht_dB'], linestyle = '--', c = 'tab:blue', alpha = 0.3)
 plt.plot(damping['f'], damping['5R1C_schwer_dB'], linestyle = '-.', c = 'tab:blue', alpha = 0.3)
+plt.text(7*10**-2, -3.8, 'Schnittpunkt bei \n Zeitkonstanten', fontsize = 6)
+
+
+for cm in [110000, 165000, 260000]:
+    T = 1/(cm*param['B5R1C']['A_f']/param['B1R1C']['UA'])*3600
+    plt.scatter(T, -3, c = 'tab:green', s = 5)    
+del T
 
 
 plt.xscale('log')
 plt.ylabel('Dämpfung in dB')
 plt.xlabel('Frequenz in rad/h')
-# plt.xticks([i*0.001 for i in range(1,10)]+[i*0.01 for i in range(1,10)]+[i*0.1 for i in range(1,10)]+[1])
-# plt.xlabel('Periodendauer in h')
-# plt.xticks([0.001, 0.01, 0.1, 1], [1000, 100, 10, 1])
+plt.xticks([0.0008, 0.0009]+[i*0.001 for i in range(1,10)]+[i*0.01 for i in range(1,10)]+[i*0.1 for i in range(1,10)]+[1])
+plt.yticks([i/2 for i in list(range(-60,1,5))], [-30, '', -25, '', -20, '', -15, '', -10, '', -5, '', -0])
 plt.xlim(math.pi*2/8760, math.pi*2/24)
-plt.ylim(-62,2)
+plt.ylim(-32,2)
 plt.grid(alpha = 0.3)
-plt.legend()
+# plt.legend(loc = 'lower left', fontsize = 8)
 plt.show()
 
 #%%% Plot Shift
-
-plt.plot([0,1],[20,30], c = 'black', label = 'leicht')
-plt.plot([0,1],[20,30],linestyle = '--', c = 'black', label = 'mittel')
+plt.plot([0,1],[20,30],linestyle = '--', c = 'black', label = 'leicht')
+plt.plot([0,1],[20,30], c = 'black', label = 'mittel')
 plt.plot([0,1],[20,30],linestyle = '-.', c = 'black', label = 'schwer')
 plt.plot([0,1],[20,30],linestyle = '-.', c = 'white', label = ' ')
 
@@ -451,17 +408,15 @@ plt.plot(phaseshift['f'], [i*(-1) for i in phaseshift['5R1C_schwer']], linestyle
 plt.xscale('log')
 plt.ylabel('Phasenverschiebung in °')
 
+plt.xticks([0.0008, 0.0009]+[i*0.001 for i in range(1,10)]+[i*0.01 for i in range(1,10)]+[i*0.1 for i in range(1,10)]+[1])
 plt.xlim(math.pi*2/8760, math.pi*2/24)
 plt.xlabel('Frequenz in rad/h')
-
-# plt.xlabel('Periodendauer in h')
-# plt.xticks([0.001, 0.01, 0.1, 1], [1000, 100, 10, 1])
 
 
 plt.ylim(-92,2)
 plt.yticks([0, -15, -30, -45, -60, -75, -90])
-plt.grid()
-# plt.legend()
+plt.grid(alpha = 0.3)
+plt.legend(loc = 'lower left', fontsize = 8)
 plt.show()
 
 

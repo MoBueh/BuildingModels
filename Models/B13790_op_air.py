@@ -63,7 +63,7 @@ def building_op(phi_int, theta_e, V_pkt, theta_sup, phi_HC, theta_m_prev, i_sol,
         phi_sol_op.append(param['building']['opaque components']['abs_coe']*param['building']['opaque components']['R_se']*param['building']['opaque components']['U']*A*i)   
 # total solar heat gain
     phi_sol = sum(phi_sol_trans) + sum(phi_sol_op)    
-    print(phi_sol)
+    # print(phi_sol)
 # Equation for Model regarding Appendix C
     H_tr_1 = 1 / (1/H_ve + 1/H_tr_is)                                           # C.6
     H_tr_2 = H_tr_1 + H_tr_w                                                    # C.7
