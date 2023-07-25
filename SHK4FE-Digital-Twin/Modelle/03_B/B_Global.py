@@ -37,7 +37,7 @@ param['Position'] = {
 param['B'] = {
     'A_f': 14.8,                                                                # m²        conditioned area
     'Coe_Am': 2.5,                                                              # -         coefficient for the determination of mass-related area according to table 12
-    'Coe_Cm': 120000,                                                           # J/K*m²    coefficiant for the determination of Internal heat storage capacity according to table 12
+    'Coe_Cm': 120000*2,                                                           # J/K*m²    coefficiant for the determination of Internal heat storage capacity according to table 12
     'transparent components': {
         # each column is one Component
         'shading'    : [1,      1,      1,      1,      0.1,    0],             # -         1 for no shading, 0 for absolutely shadowed
@@ -85,7 +85,7 @@ def B(B_phi_int, B_phi_HC, B_theta_m_prev, theta_e, sun_h, sun_az, I_dir, I_diff
         B_phi_HC = B_phi_HC
     A_m = param['B']['A_f']*param['B']['Coe_Am']
     A_tot = 4.5 * param['B']['A_f']
-    c_m = param['B']['Coe_Cm']*param['B']['A_f']*2
+    c_m = param['B']['Coe_Cm']*param['B']['A_f']
     H_tr_w = sum([U*A for U,A in zip(param['B']['transparent components']['U'], param['B']['transparent components']['A'])])
     if V_Vdot == 0:
         H_ve = 0.00000001
