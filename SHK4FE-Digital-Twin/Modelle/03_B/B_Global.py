@@ -37,7 +37,7 @@ param['Position'] = {
 param['B'] = {
     'A_f': 14.8,                                                                # m²        conditioned area
     'Coe_Am': 2.5,                                                              # -         coefficient for the determination of mass-related area according to table 12
-    'Coe_Cm': 120000*2,                                                           # J/K*m²    coefficiant for the determination of Internal heat storage capacity according to table 12
+    'Coe_Cm': 120000/2,                                                           # J/K*m²    coefficiant for the determination of Internal heat storage capacity according to table 12
     'transparent components': {
         # each column is one Component
         'shading'    : [1,      1,      1,      1,      0.1,    0],             # -         1 for no shading, 0 for absolutely shadowed
@@ -70,11 +70,11 @@ def B(B_phi_int, B_phi_HC, B_theta_m_prev, theta_e, sun_h, sun_az, I_dir, I_diff
     # --------------------->|               |--------------------->
     # T_AMB           [°C]  |               | T_surface     [°C]
     # --------------------->|               |--------------------->
-    # Sonnenstand     [°]   |     5R1C       | T_mass        [°C]
+    # Sonnenstand     [°]   |     5R1C      | T_mass        [°C]
     # --------------------->|               |--------------------->
     # Solarstrahlung  [°C]  |               | T_operativ    [°C]
     # --------------------->|               |--------------------->
-    # Vpkt_Lüftung    [°C]  |               |
+    # Vpkt_Lüftung  [m3/hr] |               |
     # --------------------->|               |
     # T_Lüftung       [°C]  |               | 
     # --------------------->|               |
@@ -91,7 +91,7 @@ def B(B_phi_int, B_phi_HC, B_theta_m_prev, theta_e, sun_h, sun_az, I_dir, I_diff
         H_ve = 0.00000001
     else:
         H_ve = 1200*V_Vdot/3600                                                 # keine Wärmerückgewinnung
-        # H_ve = (0.85)*1200*V_Vdot/3600                                        # mit Wärmerückgewinnung
+        # H_ve = (1-0.85)*1200*V_Vdot/3600                                        # mit Wärmerückgewinnung
     H_tr_ms = 9.1*A_m
     H_op = sum([U*A for U,A in zip(param['B']['opaque components']['U'], param['B']['opaque components']['A'])])
     H_tr_em = 1/(1/H_op+1/H_tr_ms)
@@ -120,7 +120,7 @@ def B(B_phi_int, B_phi_HC, B_theta_m_prev, theta_e, sun_h, sun_az, I_dir, I_diff
         phi_sol_trans.append(shading*g_tot*F_c*0.9*(1-F_f)*A*I_sol)
 # Phi_sol: opaque components
     phi_sol_op = []
-    for shading, R, U, A, direction, tilt in zip(param['B']['opaque components']['shading'],
+    for shading, R, U, A, direction, tilt in zip(param['B']['opaque components']['shading'], # alpha and R = Rse
                                                                    param['B']['opaque components']['R'],
                                                                    param['B']['opaque components']['U'],
                                                                    param['B']['opaque components']['A'],
@@ -149,11 +149,11 @@ def B(B_phi_int, B_phi_HC, B_theta_m_prev, theta_e, sun_h, sun_az, I_dir, I_diff
     H_tr_1 = 1 / (1/H_ve + 1/H_tr_is)                                           # C.6
     H_tr_2 = H_tr_1 + H_tr_w                                                    # C.7
     H_tr_3 = 1 / (1/H_tr_2 + 1/ H_tr_ms)                                        # C.8
-    phi_ia = 0.5*B_phi_int+0*B_phi_HC                                                      # C.1
+    phi_ia = 0.5*B_phi_int+0*B_phi_HC                                   + 0*B_phi_HC                                                    # C.1
     phi_m = A_m/A_tot * (0.5 * B_phi_int + phi_sol)                     + 1*B_phi_HC                          # C.2
     phi_st = (1-A_m/A_tot-H_tr_w/9.1/A_tot)*(0.5 * B_phi_int + phi_sol) + 0*B_phi_HC          # C.3
     phi_mtot = phi_m + H_tr_em * theta_e + H_tr_3 *(phi_st +H_tr_w * theta_e + H_tr_1 * ((phi_ia)/H_ve + V_theta_sup))/ H_tr_2   # C.5
-    B_theta_m_t = (B_theta_m_prev * (c_m/3600-0.5 * (H_tr_3 +H_tr_em))+phi_mtot)/(c_m/3600+0.5*(H_tr_3+H_tr_em))  # C.4
+    B_theta_m_t = (B_theta_m_prev * (c_m/900-0.5 * (H_tr_3 +H_tr_em))+phi_mtot)/(c_m/900+0.5*(H_tr_3+H_tr_em))  # C.4
         # Output
     B_theta_m = (B_theta_m_t + B_theta_m_prev)/2                                      # C.9
     # B_theta_m = B_theta_m_t                                     # C.9
@@ -195,7 +195,7 @@ b = B(B_phi_int = 0,
       V_theta_sup = 30)
 #%% Heating
 #%%% Simulation
-df = pd.read_csv('C:/Users/49157/Documents/Python/SHK4FE-Digital-Twin/Data/Monitoring/TestSet/TestSet_winter.csv', index_col = 0)
+df = pd.read_csv('C:/Users/rdevinen/Music/GitHub/BuildingModels/SHK4FE-Digital-Twin/Data/Monitoring/TestSet/TestSet_winter.csv', index_col = 0)
 df.index = pd.to_datetime(df.index, format='%Y/%m/%d %H:%M:%S')
 df['HM4_Qpkt'] = [vpkt/1000/3600 * prop['wasser']['rho'] *prop['wasser']['cp'] * (SUP-RET) for vpkt, SUP, RET in zip(df['HM4_Vpkt'], df['HM4_T_SUP'],df['HM4_T_RET'])]
 df['HM4_Qpkt_delay'] = df['HM4_Qpkt'].shift(2)
@@ -436,7 +436,7 @@ plt.show()
 
 #%% Cooling
 #%%% Simulation
-df = pd.read_csv('C:/Users/49157/Documents/Python/SHK4FE-Digital-Twin/Data/Monitoring/TestSet/TestSet_summer.csv', index_col = 0)
+df = pd.read_csv('C:/Users/rdevinen/Music/GitHub/BuildingModels/SHK4FE-Digital-Twin/Data/Monitoring/TestSet/TestSet_summer.csv', index_col = 0)
 df.index = pd.to_datetime(df.index, format='%Y/%m/%d %H:%M:%S')
 df['HM4_Qpkt'] = [vpkt/1000/3600 * prop['wasser']['rho'] *prop['wasser']['cp'] * (SUP-RET) for vpkt, SUP, RET in zip(df['HM4_Vpkt'], df['HM4_T_SUP'],df['HM4_T_RET'])]
 df['HM4_Qpkt_delay'] = df['HM4_Qpkt'].shift(-3)
